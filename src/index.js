@@ -2,36 +2,26 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import './index.css'
 
-// eslint-disable-next-line no-unused-vars
-class Square extends React.Component {
-  constructor (props) {
-    super(props)
-    this.state = {
-      value: null
-    }
-  }
-
-  render () {
-    return (
-      <button
-        className="square"
-        onClick={() => this.props.onClick()}>
-        {this.props.value}
-      </button>
-    )
-  }
+function Square(props) {
+  return (
+    <button
+      className="square"
+      onClick={() => props.onClick()}>
+      {props.value}
+    </button>
+  )
 }
 
-// eslint-disable-next-line no-unused-vars
 class Board extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
-      squares: Array(9).fill(null)
+      squares: Array(9).fill(null),
+      xIsCurrent: true
     }
   }
 
-  renderSquare (i) {
+  renderSquare(i) {
     return (
       <Square
         value={this.state.squares[i]}
@@ -40,18 +30,22 @@ class Board extends React.Component {
     )
   }
 
-  handleClick (i) {
-    const squares = this.state.squares.slice()
-    squares[i] = 'X'
-    this.setState({ squares: squares })
+  handleClick(i) {
+    const squares = this.state.squares.slice();
+    if (calculateWinner(squares) || squares[i]) {
+      return;
+    }
+    squares[i] = this.state.xIsCurrent ? 'X' : 'O';
+    this.setState({
+      squares: squares,
+      xIsCurrent: !this.state.xIsCurrent
+    });
   }
 
-  render () {
-    const status = 'Next player: X'
-
+  render() {
     return (
       <div>
-        <div className="status">{status}</div>
+        <div className="status">{calculateStatus(this.state)}</div>
         <div className="board-row">
           {this.renderSquare(0)}
           {this.renderSquare(1)}
@@ -72,9 +66,8 @@ class Board extends React.Component {
   }
 }
 
-// eslint-disable-next-line no-unused-vars
 class Game extends React.Component {
-  render () {
+  render() {
     return (
       <div className="game">
         <div className="game-board">
@@ -95,3 +88,38 @@ ReactDOM.render(
   <Game/>,
   document.getElementById('root')
 )
+
+function calculateWinner(squares) {
+  const lines = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+  for (let i = 0; i < lines.length; i++) {
+    const [a, b, c] = lines[i];
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      return squares[a];
+    }
+  }
+  return null;
+}
+
+function calculateStatus({squares, xIsCurrent}) {
+  const winner = calculateWinner(squares);
+
+  if (winner) {
+    return (winner + ' a gagné');
+  } else {
+    for (let i = 0; i < squares.length; i++) {
+      if (!squares[i]) {
+        return 'Joueur en cours : ' + (xIsCurrent ? 'X' : 'O');
+      }
+    }
+  }
+  return 'Personne n\'a gagné';
+}
