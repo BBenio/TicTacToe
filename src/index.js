@@ -49,10 +49,11 @@ class Game extends React.Component {
       }],
       xIsCurrent: true,
       stepNumber: 0,
+      reversedMovementsDisplay: false
     }
   }
 
-  handleClick(i) {
+  handleClickBoard(i) {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
@@ -60,6 +61,7 @@ class Game extends React.Component {
       return;
     }
     squares[i] = this.state.xIsCurrent ? 'X' : 'O';
+
     this.setState({
       history: history.concat([{
         squares: squares,
@@ -73,17 +75,25 @@ class Game extends React.Component {
     this.setState({
       stepNumber: step,
       xIsCurrent: (step % 2) === 0,
+      history: this.state.history.slice(0, step+1)
     });
   }
+
+  reverse() {
+    this.setState({
+      reversedMovementsDisplay: !this.state.reversedMovementsDisplay,
+    });
+  }
+
 
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
 
-    const moves = history.map((step, move) => {
+    let moves = history.map((step, move) => {
       const desc = move ?
-        'Revenir au tour n°' + move :
-        'Revenir au début de la partie';
+        'Go back to #' + move :
+        'Go back to the beginning';
       return (
         <li key={move}>
           <button onClick={() => this.jumpTo(move)}>{desc}</button>
@@ -91,18 +101,24 @@ class Game extends React.Component {
       );
     });
 
+    if (this.state.reversedMovementsDisplay) {
+      moves = moves.slice().reverse();
+    }
+
     let status = calculateStatus({squares: current.squares, xIsCurrent: this.state.xIsCurrent});
+
     return (
       <div className="game">
         <div className="game-board">
           <Board
             squares={current.squares}
-            onClick={(i) => this.handleClick(i)}
+            onClick={(i) => this.handleClickBoard(i)}
           />
         </div>
         <div className="game-info">
           <div>{status}</div>
-          <ol>{moves}</ol>
+          <button onClick={() => {this.reverse()}}>Reverse the order</button>
+          <ul>{moves}</ul>
         </div>
       </div>
     )
@@ -140,13 +156,13 @@ function calculateStatus({squares, xIsCurrent}) {
   const winner = calculateWinner(squares);
 
   if (winner) {
-    return (winner + ' a gagné');
+    return (winner + ' win!');
   } else {
     for (let i = 0; i < squares.length; i++) {
       if (!squares[i]) {
-        return 'Joueur en cours : ' + (xIsCurrent ? 'X' : 'O');
+        return 'Player:' + (xIsCurrent ? 'X' : 'O');
       }
     }
   }
-  return 'Personne n\'a gagné';
+  return 'Nobody win';
 }

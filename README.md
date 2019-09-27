@@ -1,4 +1,6 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is my first project in react.
+
+That's a tic-tac-toe game with a history of each movement.
 
 ## Available Scripts
 
