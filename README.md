@@ -1,6 +1,6 @@
 # Tic Tac Toe
 
-This is my first project in react.
+This is my first project in React.Js.
 
 That's a tic-tac-toe game with a history of each movement.
 
